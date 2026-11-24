@@ -3,128 +3,103 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Feliz Natal (ASCII)</title>
+<title>Feliz Natal!!!</title>
 <style>
-:root{color-scheme:dark;--bg:#03050a;--gold:#ffd98a;--ink:#fff1d6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#03050a}}
-:root[data-theme="dark"]{--bg:#03050a}
+:root{color-scheme:dark;--bg:#000;--gold:#ffd98a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000}}
+:root[data-theme="dark"]{--bg:#000}
 html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
-body{height:100%;margin:0;background:var(--bg);color:var(--ink);overflow:hidden;font-family:"Courier New",Courier,monospace}
+body{height:100%;margin:0;background:var(--bg);overflow:hidden;font-family:"Courier New",Courier,monospace}
 canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
-#ui{display:none;position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 2.5vh);text-align:center;pointer-events:none;padding:0 12px}
-#art{display:inline-block;text-align:left;margin:0;font:700 min(1.9vw,1.15vh)/1 "Courier New",Courier,monospace;color:var(--gold);text-shadow:0 0 10px rgba(255,190,90,.6);white-space:pre;clip-path:inset(0 100% 0 0);transition:clip-path 2.4s steps(48)}
-.show #art{clip-path:inset(0 0 0 0)}
-#to{margin:.5em 0 0;font-weight:700;font-size:clamp(17px,4.4vw,28px);color:#ffe9c2;text-shadow:0 0 8px rgba(255,190,90,.5)}
-#msg{margin:.4em auto 0;max-width:520px;font-weight:700;font-size:clamp(11px,2.8vw,14px);line-height:1.35;color:#d9c598}
-#to,#msg{opacity:0;transition:opacity 1.8s}
-.show #to,.show #msg{opacity:1}
 #hud{position:fixed;left:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);margin:0;font:11px/1.5 "Courier New",monospace;color:#6f7d90;pointer-events:none}
 #tt{position:fixed;right:12px;top:calc(env(safe-area-inset-top,0px) + 8px);font:12px "Courier New",monospace;color:#ff7ab6;pointer-events:none}
-#ctl{position:fixed;left:10px;top:calc(env(safe-area-inset-top,0px) + 8px);display:flex;gap:6px;z-index:3}
-#ctl button,#apply{padding:5px 8px;border:1px solid rgba(255,217,138,.4);background:rgba(0,0,0,.5);color:var(--gold);font:700 11px "Courier New",monospace;cursor:pointer}
-#panel{position:fixed;left:10px;top:calc(env(safe-area-inset-top,0px) + 44px);width:min(290px,82vw);padding:12px;background:rgba(6,9,18,.95);border:1px solid rgba(255,217,138,.4);display:none;z-index:3}
-#panel.on{display:block}
-#edit,#panel{display:none!important}
-#panel label{display:block;font-size:12px;margin:6px 0 3px;color:#cdb98f}
-#panel input,#panel textarea{width:100%;box-sizing:border-box;padding:7px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#fff;font:inherit;font-size:13px}
-#apply{width:100%;margin-top:10px}
+#rep{position:fixed;left:10px;top:calc(env(safe-area-inset-top,0px) + 8px);padding:5px 8px;border:1px solid rgba(255,217,138,.4);background:rgba(0,0,0,.5);color:var(--gold);font:700 11px "Courier New",monospace;cursor:pointer;z-index:3}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
-<div id="ui"><p id="to"></p><p id="msg"></p></div>
 <pre id="hud"></pre><div id="tt"></div>
-<div id="ctl"><button id="rep">[ repetir ]</button><button id="edit">[ editar ]</button></div>
-<div id="panel">
-<label for="inName">Para quem?</label><input id="inName" maxlength="40">
-<label for="inMsg">Mensagem</label><textarea id="inMsg" rows="4" maxlength="200"></textarea>
-<button id="apply">Aplicar</button>
-</div>
+<button id="rep">[ repetir ]</button>
 <script>
 (()=>{
-const $=id=>document.getElementById(id),X=$('c').getContext('2d'),rnd=Math.random,TAU=6.2832;
-const AC=document.createElement('canvas'),A2=AC.getContext('2d'),S4=document.createElement('canvas'),S4c=S4.getContext('2d'),S8=document.createElement('canvas'),S8c=S8.getContext('2d');
-const D={name:'alguém muito especial',msg:'Que o seu Natal seja cheio de luz, paz e amor - e que você nunca esqueça o quanto é especial. *'};
-function setText(n,m){$('to').textContent='~ para '+n+' ~';$('msg').textContent=m;$('inName').value=n;$('inMsg').value=m}
-setText(D.name,D.msg);
-
-function art(t){const fs=56,c=document.createElement('canvas'),x=c.getContext('2d'),f=`${fs}px Impact,"Arial Black",sans-serif`;x.font=f;const w=Math.ceil(x.measureText(t).width)+8,h=fs+16;c.width=w;c.height=h;x.font=f;x.fillStyle='#fff';x.textBaseline='top';x.fillText(t,4,4);
-const d=x.getImageData(0,0,w,h).data,L=[];
-for(let y=0;y<h;y+=6){let l='';for(let xx=0;xx<w;xx+=3){let s=0;for(let j=0;j<6;j++)for(let i=0;i<3;i++)s+=d[((y+j)*w+xx+i)*4+3];const v=s/(18*255);l+=v>.75?'@':v>.55?'#':v>.4?'*':v>.25?'+':v>.1?':':' '}L.push(l)}
-while(L.length&&!L[0].trim())L.shift();while(L.length&&!L[L.length-1].trim())L.pop();return L}
-if(0){const a=art('Feliz'),b=art('Natal'),w=Math.max(a[0].length,b[0].length),cen=l=>{const k=Math.floor((w-l.length)/2);return ' '.repeat(k)+l+' '.repeat(w-l.length-k)};$('art').textContent=[...a.map(cen),'',...b.map(cen)].join('\n')}
-
-let W,Hh,DPR,U,F,CX,CY,cA=1,sA=0,CS,cw,chh,cols,rows,dep,chA,colA;
-const touched=[],cc={},CAM=7,TILT=.2,CEN=1.55,cT=Math.cos(TILT),sT=Math.sin(TILT);
+const $=id=>document.getElementById(id),X=$('c').getContext('2d',{alpha:false}),rnd=Math.random,TAU=6.2832;
+const mk=()=>{const c=document.createElement('canvas');return[c,c.getContext('2d',{alpha:false})]};
+const [AC,A2]=mk(),[S2,S2c]=mk(),[S4,S4c]=mk(),[S8,S8c]=mk(),ATC=document.createElement('canvas'),ATX=ATC.getContext('2d');
+let W,Hh,DPR,U,F,CX,CY,cA=1,sA=0,CS,cw,chh,cols,rows,dep,chA,colA,bloom=2,QS=1,atCols=1,atMax=1,atN=0;
+const touched=[],cc={},atM=new Map(),CAM=7,TILT=.2,CEN=1.55,cT=Math.cos(TILT),sT=Math.sin(TILT);
 const stars=[],snow=[],parts=[];
-for(let i=0;i<230;i++)stars.push({x:rnd(),y:rnd(),s:rnd(),ph:rnd()*9});
-for(let i=0;i<110;i++)snow.push({x:rnd(),y:rnd(),v:.04+rnd()*.07,ph:rnd()*9});
-function resize(){DPR=Math.min(window.devicePixelRatio||1,2);W=$('c').width=Math.round(innerWidth*DPR);Hh=$('c').height=Math.round(innerHeight*DPR);U=Math.min(Hh*.15,W*.24);F=U*CAM;CX=W/2;CY=Hh*.6;
-AC.width=W;AC.height=Hh;S4.width=Math.ceil(W/4);S4.height=Math.ceil(Hh/4);S8.width=Math.ceil(W/8);S8.height=Math.ceil(Hh/8);A2.fillStyle='#000';A2.fillRect(0,0,W,Hh);S4c.imageSmoothingQuality='high';S8c.imageSmoothingQuality='high';
-CS=Math.max(8*DPR,U*.085);cw=CS*.6;chh=CS;cols=Math.ceil(W/cw)+1;rows=Math.ceil(Hh/chh)+1;dep=new Float32Array(cols*rows);chA=new Array(cols*rows);colA=new Uint32Array(cols*rows)}
+for(let i=0;i<200;i++)stars.push({x:rnd(),y:rnd(),s:rnd(),ph:rnd()*9});
+for(let i=0;i<100;i++)snow.push({x:rnd(),y:rnd(),v:.04+rnd()*.07,ph:rnd()*9});
+const css=c=>cc[c]||(cc[c]='#'+(c|0x1000000).toString(16).slice(1));
+
+function resize(){DPR=Math.min(window.devicePixelRatio||1,1.5);W=$('c').width=Math.round(innerWidth*DPR);Hh=$('c').height=Math.round(innerHeight*DPR);U=Math.min(Hh*.15,W*.24);F=U*CAM;CX=W/2;CY=Hh*.6;
+CS=Math.max(9*DPR,U*.09)*QS;cw=Math.max(4,Math.round(CS*.6));chh=Math.max(7,Math.round(CS));cols=Math.ceil(W/cw)+1;rows=Math.ceil(Hh/chh)+1;
+dep=new Float32Array(cols*rows);chA=new Array(cols*rows);colA=new Uint32Array(cols*rows);
+AC.width=W;AC.height=Hh;S2.width=W>>1;S2.height=Hh>>1;S4.width=W>>2;S4.height=Hh>>2;S8.width=W>>3;S8.height=Hh>>3;A2.fillStyle='#000';A2.fillRect(0,0,W,Hh);
+ATC.width=ATC.height=2048;atCols=Math.floor(2048/cw);atMax=atCols*Math.floor(2048/chh);atM.clear();atN=0;
+ATX.font=`bold ${Math.round(chh)}px "Courier New",Courier,monospace`;ATX.textAlign='center';ATX.textBaseline='middle'}
 addEventListener('resize',resize);resize();
 
+/* grade ASCII com z-buffer: um caractere por célula */
 function put(x,y,z,ch,r,g,b){const cx=(x/cw)|0,cy=(y/chh)|0;if(x<0||y<0||cx>=cols||cy>=rows)return;const i=cy*cols+cx;if(z<dep[i]){if(dep[i]===Infinity)touched.push(i);dep[i]=z;chA[i]=ch;colA[i]=(((r>255?255:r)>>3<<3)<<16)|(((g>255?255:g)>>3<<3)<<8)|((b>255?255:b)>>3<<3)}}
-const css=c=>cc[c]||(cc[c]='#'+(c|0x1000000).toString(16).slice(1));
+/* atlas de glifos: cada (letra, cor) é desenhado uma vez e depois só copiado */
+function slot(ch,c){const key=ch.charCodeAt(0)*16777216+c;let s=atM.get(key);if(s===undefined){if(atN>=atMax){atM.clear();atN=0;ATX.clearRect(0,0,2048,2048)}s=atN++;ATX.fillStyle=css(c);ATX.fillText(ch,(s%atCols)*cw+cw/2,((s/atCols)|0)*chh+chh/2);atM.set(key,s)}return s}
+
 let px,py,ps,pz;
 function proj(x,y,z){const x1=x*cA+z*sA,z1=-x*sA+z*cA,yy=y-CEN;const y2=yy*cT+z1*sT;pz=-yy*sT+z1*cT+CAM;ps=F/pz;px=CX+x1*ps;py=CY-y2*ps}
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+
+/* mouse balança folhas e bolinhas */
 let mx=-1e5,my=-1e5,mvx=0,mvy=0,ME=0;
 addEventListener('pointermove',e=>{const nx=e.clientX*DPR,ny=e.clientY*DPR;if(mx>-1e4){const dx=nx-mx,dy=ny-my;mvx=mvx*.6+dx*.4;mvy=mvy*.6+dy*.4;ME=Math.min(1.4,ME+Math.hypot(dx,dy)/(U*.45))}mx=nx;my=ny});
 function sway(p){if(!p.sw||ME<.01)return;const dx=px-mx,dy=py-my,MR=U*1.15,d2=dx*dx+dy*dy;if(d2>=MR*MR)return;const f=1-Math.sqrt(d2)/MR,w=f*f*ME*p.sw,hh=p.h||(p.ph||0)*97,cap=U*.3,tn=performance.now()/1e3;px+=clamp(mvx*w,-cap,cap)+Math.sin(tn*12+hh*.37)*w*U*.08;py+=clamp(mvy*w,-cap,cap)+Math.cos(tn*10+hh*.53)*w*U*.06}
 
 const P=[],G=[];
 function add(a,x,y,z,r,g,b,t,o){const p={x,y,z,r,g,b,t};if(o)Object.assign(p,o);a.push(p);return p}
+const POOLS=['1il!;:','rtfjcvxz=+','aeoun0{}[]<>','08B$#&%Q'],ORN='@O0o*';
 const Y0=.5,Y1=3.5,TG=[.8,5.6],gt=y=>TG[0]+(TG[1]-TG[0])*clamp(y/Y1,0,1);
 const env=y=>1.55*Math.pow(1-clamp((y-Y0)/(Y1-Y0),0,1),.9)+.04;
-const POOLS=['1il!;:','rtfjcvxz=+','aeoun0{}[]<>','08B$#&%Q'],ORN='@O0o*';
 
 /* galhos caídos em camadas */
 for(let i=0;i<22;i++){const y=Y0+.02+(Y1-Y0-.08)*i/21,u=(y-Y0)/(Y1-Y0),R=env(y)+.05,nb=Math.round(6+12*(1-u));
-for(let b=0;b<nb;b++){const a=TAU*(b+.5*rnd())/nb+i*.77,L=R*(.85+.23*rnd()),n=Math.round(8+42*L);
+for(let b=0;b<nb;b++){const a=TAU*(b+.5*rnd())/nb+i*.77,L=R*(.85+.23*rnd()),n=Math.round(6+24*L);
 for(let k=0;k<n;k++){const s=.2+.8*rnd(),r=L*s,yy=y-.3*L*s*s+(rnd()-.5)*.06,aa=a+(rnd()-.5)*.25,dm=.6+.5*s;
 add(P,r*Math.cos(aa),yy,r*Math.sin(aa),(15+rnd()*50)*dm,(100+rnd()*130)*dm,(25+rnd()*50)*dm,gt(yy)+rnd()*.15,{pool:1,h:(rnd()*1e4)|0,l:.5+.5*rnd(),sw:1})}}}
-/* cone interno escuro: nada aparece através dos galhos */
-for(let k=0;k<5500;k++){const y=Y0+rnd()*(Y1-Y0-.1),a=rnd()*TAU,r=.6*env(y);add(P,r*Math.cos(a),y,r*Math.sin(a),10,45+rnd()*25,14,gt(y)+rnd()*.15,{ch:'.:;'[k%3]})}
+/* cone interno escuro */
+for(let k=0;k<3400;k++){const y=Y0+rnd()*(Y1-Y0-.1),a=rnd()*TAU,r=.6*env(y);add(P,r*Math.cos(a),y,r*Math.sin(a),10,45+rnd()*25,14,gt(y)+rnd()*.15,{ch:'.:;'[k%3]})}
 /* tronco */
-for(let k=0;k<700;k++){const y=rnd()*(Y0+.1),a=rnd()*TAU;add(P,.13*Math.cos(a),y,.13*Math.sin(a),(110+rnd()*40)*(.75+.25*Math.sign(Math.sin(a*30+y*5))),70+rnd()*25,35,.4+y,{ch:'#%|H'[k%4]})}
-/* guirlanda dourada em festões */
-for(let s=0;s<1;s+=1/650){const y=.8+s*2.35-.11*Math.sin((s*5.5%1)*Math.PI),th=s*5.5*TAU;add(P,(env(y)*.97+.07)*Math.cos(th),y,(env(y)*.97+.07)*Math.sin(th),255,200,60,5.7+s*2.3,{br:1.3,ch:'~=-+'[(rnd()*4)|0]})}
-
+for(let k=0;k<320;k++){const y=rnd()*(Y0+.1),a=rnd()*TAU;add(P,.13*Math.cos(a),y,.13*Math.sin(a),(110+rnd()*40)*(.75+.25*Math.sign(Math.sin(a*30+y*5))),70+rnd()*25,35,.4+y,{ch:'#%|H'[k%4]})}
+/* guirlanda dourada */
+for(let s=0;s<1;s+=1/330){const y=.8+s*2.35-.11*Math.sin((s*5.5%1)*Math.PI),th=s*5.5*TAU;add(P,(env(y)*.97+.07)*Math.cos(th),y,(env(y)*.97+.07)*Math.sin(th),255,200,60,5.7+s*2.3,{br:1.3,ch:'~=-+'[(rnd()*4)|0]})}
 /* luzes */
 const warm=[255,238,180],lc=[[255,70,60],[100,170,255],[255,100,210],[120,255,150]];
 for(let i=0;i<114;i++){const y=.75+rnd()*2.5,th=rnd()*TAU,r=env(y)*.92+.06,c=rnd()<.8?warm:lc[i%4];add(G,r*Math.cos(th),y,r*Math.sin(th),c[0],c[1],c[2],6+i*.045,{ph:rnd()*9,sw:1.2})}
 /* bolinhas vermelhas */
 for(let i=0;i<26;i++){const y=.85+(i/26)*2.35+rnd()*.06,r0=env(y)*.9+.06,th=i*2.399,cx=r0*Math.cos(th),cz=r0*Math.sin(th),tt=gt(y)+.3+rnd()*.4;
-for(let k=0;k<44;k++){const yy=1-2*(k+.5)/44,rad=Math.sqrt(1-yy*yy),a=k*2.399,nx=rad*Math.cos(a),nz=rad*Math.sin(a);add(P,cx+nx*.095,y+yy*.095,cz+nz*.095,225,28,38,tt,{nx,ny:yy,nz,orn:1,sw:2,h:(i*977)%1e4})}}
-/* estrela */
-const poly=[];for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?.08:.2;poly.push([r*Math.cos(a),r*Math.sin(a)])}
-function inP(x,y){let c=false;for(let i=0,j=9;i<10;j=i++){const[a,b]=poly[i],[d,e]=poly[j];if((b>y)!==(e>y)&&x<(d-a)*(y-b)/(e-b)+a)c=!c}return c}
-
-
+for(let k=0;k<30;k++){const yy=1-2*(k+.5)/30,rad=Math.sqrt(1-yy*yy),a=k*2.399,nx=rad*Math.cos(a),nz=rad*Math.sin(a);add(P,cx+nx*.1,y+yy*.1,cz+nz*.1,225,28,38,tt,{nx,ny:yy,nz,orn:1,sw:2,h:(i*977)%1e4})}}
 /* presentes */
-function present(x0,z0,w,h,col,rib,t,rot){const s=.045,n=Math.round(w/s),m=Math.round(h/s),cr=Math.cos(rot),sr=Math.sin(rot);
+function present(x0,z0,w,h,col,rib,t,rot){const s=.06,n=Math.round(w/s),m=Math.round(h/s),cr=Math.cos(rot),sr=Math.sin(rot);
 const q=(lx,y,lz,r)=>{const c=r?rib:col;add(P,x0+lx*cr+lz*sr,y,z0-lx*sr+lz*cr,c[0],c[1],c[2],t,{drop:1,ch:(r?'+=*#':'#%@&')[(rnd()*4)|0]})};
-for(let i=0;i<=n;i++){const u=-w/2+i*s;for(let j=0;j<=n;j++){const v=-w/2+j*s;q(u,h,v,Math.abs(u)<.04||Math.abs(v)<.04)}
-for(let j=0;j<=m;j++){const y=j*s,r=Math.abs(u)<.04;q(u,y,-w/2,r);q(u,y,w/2,r);q(-w/2,y,u,r);q(w/2,y,u,r)}}
-for(let k=0;k<14;k++){const a=k/14*TAU,yy=h+.05+Math.abs(Math.sin(a))*.06;q(Math.cos(a)*.07+.07,yy,0,1);q(Math.cos(a)*.07-.07,yy,0,1)}}
+for(let i=0;i<=n;i++){const u=-w/2+i*s;for(let j=0;j<=n;j++){const v=-w/2+j*s;q(u,h,v,Math.abs(u)<.045||Math.abs(v)<.045)}
+for(let j=0;j<=m;j++){const y=j*s,r=Math.abs(u)<.045;q(u,y,-w/2,r);q(u,y,w/2,r);q(-w/2,y,u,r);q(w/2,y,u,r)}}
+for(let k=0;k<10;k++){const a=k/10*TAU,yy=h+.05+Math.abs(Math.sin(a))*.06;q(Math.cos(a)*.07+.07,yy,0,1);q(Math.cos(a)*.07-.07,yy,0,1)}}
 present(1.3,.95,.42,.36,[215,35,45],[255,205,90],5,.3);
 present(-1.25,.7,.34,.3,[255,195,70],[215,35,45],5.4,-.4);
 present(.35,-1.35,.3,.26,[40,160,80],[215,35,45],5.8,.2);
 present(-.6,1.35,.26,.22,[70,120,240],[240,240,255],6.1,.5);
 
 function burst(x,y,n){for(let i=0;i<n;i++){const a=rnd()*TAU,v=(.2+rnd()*.9)*U*1.6;parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:1+rnd()*.7,m:1.7,c:[[255,215,120],[255,120,160],[120,210,255],[160,255,170]][i%4]})}}
-let fired=false,shown=false,T0=0,last=0,fc=0;
+let fired=false,T0=0,last=0,fc=0,ema=16,slow=0;
 $('c').addEventListener('pointerdown',e=>burst(e.clientX*DPR,e.clientY*DPR,40));
 
-/* chão de texto, calculado célula a célula */
+/* chão de texto + tapete vermelho, célula a célula */
 const FL=".:-=+,;`'";
-function floor(now){for(let cy=0;cy<rows;cy++){const sy=(cy+.5)*chh,k=(CY-sy)/F,den=k*cT-sT;if(den>=-.002)continue;const yy=-CEN,z1=(yy*cT-k*(-yy*sT+CAM))/den,z2=-yy*sT+z1*cT+CAM;if(z2<=0)continue;
+function floor(now){const RR=2.55*clamp((now-.2)/1.6,0,1);
+for(let cy=0;cy<rows;cy++){const sy=(cy+.5)*chh,k=(CY-sy)/F,den=k*cT-sT;if(den>=-.002)continue;const yy=-CEN,z1=(yy*cT-k*(-yy*sT+CAM))/den,z2=-yy*sT+z1*cT+CAM;if(z2<=0)continue;
 for(let cx=0;cx<cols;cx++){const sx=(cx+.5)*cw,x1=(sx-CX)*z2/F,wx=x1*cA-z1*sA,wz=x1*sA+z1*cA,d2=wx*wx+wz*wz;if(d2>300)continue;
 let h=Math.imul(Math.floor(wx*6),374761393)^Math.imul(Math.floor(wz*6),668265263);h=Math.imul(h^(h>>>13),1274126177);h^=h>>>16;h>>>=0;
-const rr=Math.sqrt(d2),RR=2.55*clamp((now-.2)/1.6,0,1);
-if(rr<RR){let rc,rg,rb,rch;if(rr>2.3){rc=235;rg=185;rb=70;rch='=#'[h&1]}else if(rr>2.12){rc=120;rg=14;rb=24;rch='%'}else if(rr>1.95&&rr<2.05){rc=240;rg=190;rb=80;rch='*+'[h&1]}else{const w=.78+.22*Math.sin(Math.atan2(wz,wx)*12+rr*9);rc=215*w;rg=26*w;rb=36*w;rch='#%W&8@'[(h>>>4)%6]}put(sx,sy,50+z2,rch,rc,rg,rb);continue}
-if(h%100>90-d2*.28)continue;const v=25+95/(1+d2*.04);put(sx,sy,200+z2,FL[(h>>>8)%FL.length],v*.7,v*.85,v)}}}
+if(d2<RR*RR){const rr=Math.sqrt(d2);let rc,rg,rb,rch;if(rr>2.3){rc=235;rg=185;rb=70;rch='=#'[h&1]}else if(rr>2.12){rc=120;rg=14;rb=24;rch='%'}else if(rr>1.95&&rr<2.05){rc=240;rg=190;rb=80;rch='*+'[h&1]}else{const w=.78+.22*Math.sin(Math.atan2(wz,wx)*12+rr*9);rc=215*w;rg=26*w;rb=36*w;rch='#%W&8@'[(h>>>4)%6]}put(sx,sy,50+z2,rch,rc,rg,rb);continue}
+if(h%100>50-d2*.15)continue;const v=25+95/(1+d2*.04);put(sx,sy,200+z2,FL[(h>>>8)%FL.length],v*.7,v*.85,v)}}}
 
 /* estrela do topo: sempre de frente para a câmera */
 function star(now){if(now<5.8)return;proj(0,3.52,0);const k=clamp((now-5.8)/.8,0,1),pul=.94+.06*Math.sin(now*3),R=U*.3*k*pul,r2=R*.42,cx=px,cy=py-R*.62,pts=[];
@@ -137,45 +112,48 @@ if(edge)put(x,y,-9,'*',255,238,150);else put(x,y,-9,'#8B$&@'[((c*7+r*13+(now*5|0
 const L=Math.round(k*R*2.4/cw*(.85+.15*Math.sin(now*4))),Lv=Math.round(k*R*1.9/chh*(.85+.15*Math.sin(now*4+1)));
 for(let i=1;i<=L;i++){const v=1-i/(L+1);put(cx+i*cw,cy,-8.9,'-',255*v,230*v,150*v);put(cx-i*cw,cy,-8.9,'-',255*v,230*v,150*v)}
 for(let i=1;i<=Lv;i++){const v=1-i/(Lv+1);put(cx,cy+i*chh,-8.9,'|',255*v,230*v,150*v);put(cx,cy-i*chh,-8.9,'|',255*v,230*v,150*v)}}
+
 function frame(ms){
 requestAnimationFrame(frame);
 if(!T0)T0=ms;const now=(ms-T0)/1000,dt=Math.min(.05,(ms-last)/1000||.016);last=ms;
 const A=.4+now*.31;cA=Math.cos(A);sA=Math.sin(A);ME*=Math.exp(-dt*1.5);mvx*=Math.exp(-dt*4);mvy*=Math.exp(-dt*4);
-X.fillStyle='#03050a';X.fillRect(0,0,W,Hh);
 dep.fill(Infinity);touched.length=0;
 floor(now);
 const sf=clamp(now/1.2,0,1);
 for(const s of stars){const v=(sf*(.35+.65*Math.abs(Math.sin(now*.9+s.ph)))*235)|0;put(s.x*W,s.y*Hh,100,s.s>.35?'+':s.s>.12?'*':'.',v,v,v)}
 
 for(const p of P){const age=now-p.t;if(age<0)continue;let y=p.y;if(p.drop){const d=1-age/.9;if(d>0)y+=d*d*4}
-proj(p.x,y,p.z);sway(p);const br=clamp(.72-.5*(pz-CAM)/2.4,.22,1.15)*(p.br||1);let r=p.r*br,g=p.g*br,b=p.b*br,ch=p.ch;if(p.pool){const pl=POOLS[Math.min(3,(clamp(br*p.l*1.1,0,1)*3.2)|0)];ch=pl[(p.h+((now*4+p.h%11)|0))%pl.length]}if(p.orn){const nz=-p.nx*sA+p.nz*cA,lit=clamp(.5-nz*.5+p.ny*.25,0,1),bb=.35+.85*lit;r=p.r*bb;g=p.g*bb;b=p.b*bb;ch=ORN[Math.min(4,((1-lit)*5)|0)];if(lit>.88){r=255;g=200;b=200}}
+proj(p.x,y,p.z);sway(p);const br=clamp(.72-.5*(pz-CAM)/2.4,.22,1.15)*(p.br||1);let r=p.r*br,g=p.g*br,b=p.b*br,ch=p.ch;
+if(p.pool){const pl=POOLS[Math.min(3,(clamp(br*p.l*1.1,0,1)*3.2)|0)];ch=pl[(p.h+((now*4+p.h%11)|0))%pl.length]}
+if(p.orn){const nz=-p.nx*sA+p.nz*cA,lit=clamp(.5-nz*.5+p.ny*.25,0,1),bb=.35+.85*lit;r=p.r*bb;g=p.g*bb;b=p.b*bb;ch=ORN[Math.min(4,((1-lit)*5)|0)];if(lit>.88){r=255;g=200;b=200}}
 if(age<.8){if(age<.3){ch='#';r=g=b=255}else{const f=1-(age-.3)/.5;r+=(255-r)*f;g+=(255-g)*f;b+=(255-b)*f}}
 put(px,py,pz,ch,r,g,b)}
 
 let nl=0;
-for(const p of G){const age=now-p.t;if(age<0)continue;proj(p.x,p.y,p.z);sway(p);let ch;
-if(age<.3)ch='@';else if(p.ph!==undefined){nl++;const tw=.5+.5*Math.sin(now*2.2+p.ph);ch=tw>.8?'@':tw>.5?'O':tw>.25?'o':'+'}else ch='*';
-put(px,py,pz-.4,ch,p.r,p.g,p.b)}
+for(const p of G){const age=now-p.t;if(age<0)continue;proj(p.x,p.y,p.z);sway(p);nl++;const tw=.5+.5*Math.sin(now*2.2+p.ph);
+put(px,py,pz-.4,age<.3?'@':tw>.8?'@':tw>.5?'O':tw>.25?'o':'+',p.r,p.g,p.b)}
 star(now);if(now>5.8&&!fired){fired=true;proj(0,3.52,0);burst(px,py-U*.2,70)}
 
 const sa=clamp((now-6)/2,0,1);
 if(sa>0)for(const f of snow){f.y+=f.v*dt;f.x+=Math.sin(now+f.ph)*dt*.02;if(f.y>1){f.y=-.02;f.x=rnd()}const v=230*sa|0;put(f.x*W,f.y*Hh,-20,f.v>.07?'*':'.',v,v,v)}
 for(let i=parts.length-1;i>=0;i--){const q=parts[i];q.l-=dt;if(q.l<=0){parts.splice(i,1);continue}q.vy+=U*.9*dt;q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.985;const a=clamp(q.l/q.m,0,1);put(q.x,q.y,-30,a>.6?'*':a>.3?'+':'.',q.c[0]*a+40,q.c[1]*a+40,q.c[2]*a+40)}
 
-A2.globalCompositeOperation='multiply';A2.fillStyle='rgb(150,150,150)';A2.fillRect(0,0,W,Hh);A2.globalCompositeOperation='lighten';A2.textAlign='center';A2.textBaseline='middle';A2.font=`bold ${CS}px "Courier New",Courier,monospace`;
-let lc2=-1;for(let k=0;k<touched.length;k++){const i=touched[k],c=colA[i];if(c!==lc2){A2.fillStyle=css(c);lc2=c}A2.fillText(chA[i],(i%cols+.5)*cw,((i/cols|0)+.5)*chh)}
-S4c.filter='blur(1px)';S4c.drawImage(AC,0,0,S4.width,S4.height);S4c.filter='none';S8c.filter='blur(2px)';S8c.drawImage(AC,0,0,S8.width,S8.height);S8c.filter='none';
-X.globalCompositeOperation='source-over';X.drawImage(AC,0,0);X.globalCompositeOperation='lighter';X.imageSmoothingEnabled=true;X.globalAlpha=.8;X.drawImage(S4,0,0,W,Hh);X.globalAlpha=.5;X.drawImage(S8,0,0,W,Hh);X.globalAlpha=1;X.globalCompositeOperation='source-over';
+/* rastro curto + desenho dos glifos copiados do atlas */
+A2.fillStyle='rgba(0,0,0,.42)';A2.fillRect(0,0,W,Hh);
+for(let k=0;k<touched.length;k++){const i=touched[k],s=slot(chA[i],colA[i]);A2.drawImage(ATC,(s%atCols)*cw,((s/atCols)|0)*chh,cw,chh,(i%cols)*cw,((i/cols)|0)*chh,cw,chh)}
+X.globalCompositeOperation='source-over';X.drawImage(AC,0,0);
+if(bloom>0){S2c.drawImage(AC,0,0,S2.width,S2.height);S4c.drawImage(S2,0,0,S4.width,S4.height);S8c.drawImage(S4,0,0,S8.width,S8.height);
+X.globalCompositeOperation='lighter';if(bloom>1){X.globalAlpha=.7;X.drawImage(S4,0,0,W,Hh)}X.globalAlpha=.5;X.drawImage(S8,0,0,W,Hh);X.globalAlpha=1;X.globalCompositeOperation='source-over'}
 
-if(++fc%3===0){$('tt').textContent=(((now*2)|0)%2===0?'●':' ')+' t '+now.toFixed(2).padStart(5,'0')+'s';
-$('hud').textContent='rotation '+(((A*180/Math.PI)%360+360)%360).toFixed(2).padStart(6,'0')+'°\nlights   '+nl+'\nletters  '+touched.length.toLocaleString('en')+'\ninspired by @dwcminh.ascii'}
-if(now>6.5&&!shown){shown=true;document.body.classList.add('show')}
+/* qualidade adaptativa: se ficar lento, tira o brilho e depois engrossa a grade */
+ema=ema*.95+dt*1000*.05;
+if(now>2&&ema>30){if(++slow>70){slow=0;if(bloom>0)bloom--;else if(QS<1.8){QS+=.35;resize()}}}else slow=0;
+
+if(++fc%3===0){$('tt').textContent=(((now*2)|0)%2===0?'\u25cf':' ')+' t '+now.toFixed(2).padStart(5,'0')+'s';
+$('hud').textContent='rotation '+(((A*180/Math.PI)%360+360)%360).toFixed(2).padStart(6,'0')+'\u00b0\nlights   '+nl+'\nletters  '+touched.length.toLocaleString('en')+'\ninspired by @dwcminh.ascii'}
 }
 requestAnimationFrame(frame);
-
-$('rep').onclick=()=>{T0=0;fired=false;shown=false;parts.length=0;document.body.classList.remove('show')};
-$('edit').onclick=()=>$('panel').classList.toggle('on');
-$('apply').onclick=()=>{setText($('inName').value.trim()||D.name,$('inMsg').value.trim()||D.msg);$('panel').classList.remove('on')};
+$('rep').onclick=()=>{T0=0;fired=false;parts.length=0};
 })();
 </script>
 </body>
